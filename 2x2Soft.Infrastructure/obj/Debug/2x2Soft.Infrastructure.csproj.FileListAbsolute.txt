@@ -1,0 +1,4 @@
+D:\_WORK\_STEP\ASP.net\2x2Soft\2x2Soft.Infrastructure\bin\Debug\2x2Soft.Infrastructure.dll
+D:\_WORK\_STEP\ASP.net\2x2Soft\2x2Soft.Infrastructure\bin\Debug\2x2Soft.Infrastructure.pdb
+D:\_WORK\_STEP\ASP.net\2x2Soft\2x2Soft.Infrastructure\obj\Debug\2x2Soft.Infrastructure.dll
+D:\_WORK\_STEP\ASP.net\2x2Soft\2x2Soft.Infrastructure\obj\Debug\2x2Soft.Infrastructure.pdb

@@ -1,0 +1,7 @@
+D:\_WORK\_STEP\ASP.net\2x2Soft\2x2Soft.Data\bin\Debug\2x2Soft.Data.dll
+D:\_WORK\_STEP\ASP.net\2x2Soft\2x2Soft.Data\bin\Debug\2x2Soft.Data.pdb
+D:\_WORK\_STEP\ASP.net\2x2Soft\2x2Soft.Data\bin\Debug\2x2Soft.Infrastructure.dll
+D:\_WORK\_STEP\ASP.net\2x2Soft\2x2Soft.Data\bin\Debug\2x2Soft.Infrastructure.pdb
+D:\_WORK\_STEP\ASP.net\2x2Soft\2x2Soft.Data\obj\Debug\2x2Soft.Data.csprojResolveAssemblyReference.cache
+D:\_WORK\_STEP\ASP.net\2x2Soft\2x2Soft.Data\obj\Debug\2x2Soft.Data.dll
+D:\_WORK\_STEP\ASP.net\2x2Soft\2x2Soft.Data\obj\Debug\2x2Soft.Data.pdb
