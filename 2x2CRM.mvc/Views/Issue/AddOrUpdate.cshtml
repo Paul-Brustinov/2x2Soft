@@ -110,6 +110,7 @@
     var supporterName = @Html.Raw(Json.Encode(@ViewBag.selectedSupporterName));
 
     Vue.component('v-select', VueSelect.VueSelect);
+
     var vue = new Vue({
         el: '#app',
         data() {

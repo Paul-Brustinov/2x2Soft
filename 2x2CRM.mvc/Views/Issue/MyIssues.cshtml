@@ -6,9 +6,77 @@
 
 <head>
     <script src="~/Content/vue.min.js"></script>
+    <script src="~/Content/vue-select.min.js"></script>
     <script src="~/Content/vue-js-modal.min.js"></script>
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
 </head>
 
+
+<style type="text/css">
+    .modal-mask {
+        position: fixed;
+        z-index: 9998;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, .5);
+        display: table;
+        transition: opacity .3s ease;
+    }
+
+    .modal-wrapper {
+        display: table-cell;
+        vertical-align: middle;
+    }
+
+    .modal-container {
+        width: 1200px;
+        margin: 0px auto;
+        padding: 20px 30px;
+        background-color: #fff;
+        border-radius: 2px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, .33);
+        transition: all .3s ease;
+        font-family: Helvetica, Arial, sans-serif;
+    }
+
+    .modal-header h3 {
+        margin-top: 0;
+        color: #42b983;
+    }
+
+    .modal-body {
+        margin: 20px 0;
+    }
+
+    .modal-default-button {
+        float: right;
+    }
+
+    /*
+     * The following styles are auto-applied to elements with
+     * transition="modal" when their visibility is toggled
+     * by Vue.js.
+     *
+     * You can easily play with the modal transition by editing
+     * these styles.
+     */
+
+    .modal-enter {
+        opacity: 0;
+    }
+
+    .modal-leave-active {
+        opacity: 0;
+    }
+
+        .modal-enter .modal-container,
+        .modal-leave-active .modal-container {
+            -webkit-transform: scale(1.1);
+            transform: scale(1.1);
+        }
+</style>
 
 <h2>MyIssues</h2>
 
@@ -22,10 +90,12 @@
 
     <button v-on:click="prevPage"><</button>
     <button v-on:click="nextPage">></button>
+
+    <button id="show-modal" v-on:click="showModal = true">Show Modal</button>
+    <!-- use the modal component, pass in the prop -->
     показано {{(pageNo-1) * pageRows + 1}} - {{pageNo * pageRows}}
     из {{rows}}
     страниц {{pages}}
-
 
     <table class="table">
         <tr>
@@ -50,59 +120,258 @@
             <td>{{item.Name}}</td>
             <td>
                 <a :href="'/Issue/AddOrUpdate/' + item.Id"> Edit </a>
+                <button v-on:click="edit2(item.Id)">Edit2</button>
                 <a :href="'/Issue/Delete/' + item.Id"> Delete </a>
             </td>
         </tr>
 
 
     </table>
-</div>
-    <script>
-        var personList = new Vue({
-            el: '#issue-list',
-            data: {
-                items: @Html.Raw(Json.Encode(Model)),
-                filter: "",
-                pageNo: 1,
-                pageRows: 40,
-                pages: 0,
-                rows: 0
-            },
-            computed: {
-                filtered_items: function() {
-                    var ret = [];
-                    var ret0 = [];
-                    var self = this;
-                    ret0 = self.items.filter(function(item) {
-                        return item.ClientName.toLowerCase().indexOf(self.filter.toLowerCase()) !== -1;
-                    });
-                    ret = ret0.filter(function(item, index) {
-                        return (index >= (0 + (self.pageNo - 1) * self.pageRows) && index < (self.pageNo) * self.pageRows);
-                    });
 
-                    this.pages = Math.ceil(ret0.length / this.pageRows);
-                    self.rows = ret0.length;
-                    return ret;
-                },
-                filter1: {
-                    get: function() {
-                        return this.filter;
-                    },
-                    set: function(newValue) {
-                        this.pageNo = 1;
-                        this.filter = newValue;
-                    }
+    <modal v-if="showModal" v-on:close="showModal = false" :Id="currentId" :Issue.sync="currentIssue" :Persons="persons">
+    </modal>
+</div>
+<script>
+
+    Vue.component('v-select', VueSelect.VueSelect);
+    //Client:this.Persons.Find((el)=>{el.Id==this.Issue.ClientId})
+    //Client:{Id:this.ClientId, Name:this.Persons.find((el)=>{return el.Id==this.ClientId}).Name}
+    Vue.component('modal',
+    {
+        template: '#modal-template',
+        props: ['Id', 'Issue', 'Persons'],
+        data: function () {
+            return {
+                OpDate: this.Issue.Date,
+                ClientId: this.Issue.ClientId,
+                SuppId: this.Issue.SuppId,
+                IssueDetails : this.Issue.IssueDetails,
+                Supporter:{Id:this.Issue.SuppId  , Name: this.Issue.SupporterName},
+                optionsSupp: this.Persons,
+                optionsClient: this.Persons,
+                items: this.Persons,
+                Client:{Id:this.ClientId, Name:"not defined"}
+            }
+        },
+        methods: {
+            onChange(val) {
+                //console.log("onChange");
+                if (this.Issue.IssueDetails[this.Issue.IssueDetails.length - 1].Description.length) {
+                    this.Issue.IssueDetails.push({Description:"", Hours:0.00 });
                 }
             },
-            methods: {
-                nextPage: function(event) {
-                    if (this.pageNo < this.pages) this.pageNo++;
+            getClientOptions(search, loading) {
+                loading(true);
+                this.options = this.items.filter(function(item) {return item.Name.toLowerCase().indexOf(search.toLowerCase()) !== -1;});
+                loading(false);
+            },
+            getClientIdCallback(val) {
+                this.ClientId = val.Id;
+                //console.dir(JSON.stringify(val));
+            },
+            getSuppOptions(search, loading) {
+                loading(true);
+                this.options = this.items.filter(function(item) {return item.Name.toLowerCase().indexOf(search.toLowerCase()) !== -1;});
+                loading(false);
+            },
+            getSuppIdCallback(val) {
+                this.SuppId = val.Id;
+                //console.dir(JSON.stringify(val));
+            },
+            onSave() {
+                this.Issue.ClientName = this.items.find((el) => el.Id === this.ClientId).Name;
+                this.Issue.Client.Name = this.Issue.ClientName;
+                this.Issue.Client.Id = this.Issue.ClientId;
+                this.Issue.Name = this.Issue.IssueDetails[0].Description;
+
+
+                this.Issue.IssueDetails.forEach((item)=> item.Hours = Number(item.Hours));
+
+                var d = this.Issue.Date;
+                d = d.slice(6, 10) + "-" + d.slice(3, 5) + "-" + d.slice(0, 2);
+
+                var sendModel = {
+                    Id:this.Id,
+                    OpDate:d,
+                    ClientId:this.ClientId,
+                    SuppId:this.SuppId,
+                    IssueDetails:this.Issue.IssueDetails.filter(function(item) {return item.Description.trim() !== "";})
+                }
+
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", "/Issue/AddOrUpdate", true);
+                xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
+                xhr.onreadystatechange = () => {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        this.Id = xhr.responseText;
+                        //window.history.pushState('/Issue/AddOrUpdate', '/Issue/AddOrUpdate', '/Issue/AddOrUpdate/'+this.Id);
+                        //console.log(xhr.responseText);
+                    }
+                };
+                var data = JSON.stringify(sendModel);
+                xhr.send(data);
+            }
+        }
+    });
+
+    //import VModal from "vue-js-modal";
+    //Vue.component('modal', VueSelect.VueSelect);
+
+    //import VModal from 'vue-js-modal';
+    //Vue.use(VModal);
+
+
+    //Vue.component('vue-js-modal');
+
+
+    var issueList = new Vue({
+        el: '#issue-list',
+        data: {
+            items: @Html.Raw(Json.Encode(Model)),
+            filter: "",
+            pageNo: 1,
+            pageRows: 40,
+            pages: 0,
+            rows: 0,
+            showModal: false,
+            currentId: 0,
+            persons:@Html.Raw(Json.Encode(@ViewBag.persons)),
+            currentIssue: {}
+            },
+        computed: {
+            filtered_items: function() {
+                var ret = [];
+                var ret0 = [];
+                var self = this;
+                ret0 = self.items.filter(function(item) {
+                    return item.ClientName.toLowerCase().indexOf(self.filter.toLowerCase()) !== -1;
+                });
+                ret = ret0.filter(function(item, index) {
+                    return (index >= (0 + (self.pageNo - 1) * self.pageRows) && index < (self.pageNo) * self.pageRows);
+                });
+
+                this.pages = Math.ceil(ret0.length / this.pageRows);
+                self.rows = ret0.length;
+                return ret;
+            },
+            filter1: {
+                get: function() {
+                    return this.filter;
                 },
-                prevPage: function(event) {
-                    if (this.pageNo > 1) this.pageNo--;
+                set: function(newValue) {
+                    this.pageNo = 1;
+                    this.filter = newValue;
                 }
             }
-        })
+        },
+        methods: {
+            nextPage: function(event) {
+                if (this.pageNo < this.pages) this.pageNo++;
+            },
+            prevPage: function(event) {
+                if (this.pageNo > 1) this.pageNo--;
+            },
+            edit2: function(i) {
+                this.currentId = i;
 
-    </script>
+                this.currentIssue = this.items.find(el => el.Id === i);
 
+                fetch('http://localhost:64129/Issue/AddOrUpdate2/' + i)
+                    .then(resp => resp.json())
+                    .then(data => {
+                        this.currentIssue.IssueDetails = data.IssueDetails;
+                        this.currentIssue.IssueDetails.push({Description:"", Hours:0.00 });
+                        this.currentIssue.Client = this.persons.find((el) => el.Id === data.ClientId);
+                        this.currentIssue.Supporter = this.persons.find((el) => el.Id === data.SuppId);
+                    });
+
+                this.showModal = true;
+            },
+            show: function() {
+                this.$modal.show('hello-world');
+            },
+            hide: function() {
+                this.$modal.hide('hello-world');
+            }
+        }
+    });
+
+</script>
+
+<!-- template for the modal component -->
+<script type="text/x-template" id="modal-template">
+    <transition name="modal">
+        <div class="modal-mask">
+            <div class="modal-wrapper">
+                <div class="modal-container">
+
+                    <div class="modal-header">
+                        <slot name="header">
+                            Issue
+                        </slot>
+                    </div>
+
+                    <div class="modal-body">
+                        <slot name="body">
+
+                            <div class="form-group row">
+                                <label class="control-label col-md-1" for="OpDate">OpDate</label>
+                                <div class="col-md-9">
+                                    <input id="Date" name="Date" v-model:value="Issue.Date" class="form-control" />
+                                </div>
+                            </div>
+
+
+                            <div class="form-group row">
+                                <label class="control-label col-md-1" for="Client">Client</label>
+                                <div class="col-md-9">
+                                    <v-select :debounce="1000"
+                                              :on-search="getClientOptions"
+                                              :on-change="getClientIdCallback"
+                                              :options="optionsClient"
+                                              :value=Issue.Client
+                                              placeholder="Search client..."
+                                              label="Name"
+                                              >
+                                    </v-select>
+                                </div>
+                            </div>
+
+                            
+                            <div class="form-group row">
+                                <label class="control-label col-md-1" for="Client">Supporter</label>
+                                <div class="col-md-9">
+                                    <v-select :debounce="1000"
+                                              :on-search="getSuppOptions"
+                                              :on-change="getSuppIdCallback"
+                                              :options="optionsSupp"
+                                              :value=Issue.Supporter
+                                              placeholder="Search supporter..."
+                                              label="Name"
+                                              >
+                                    </v-select>
+                                </div>
+                            </div>
+
+                            <tr v-for="descr in Issue.IssueDetails">
+                                <td>
+                                    <textarea cols="100" v-on:keyup="onChange" style="max-width: 748px; width: 748px; max-height: 80px; height: 80px; resize: none;" maxlength="255" v-model="descr.Description" class="form-control" name="IssueDetails[]" placeholder="Enter task"></textarea>
+                                </td>
+                                <td style="vertical-align: top;">
+                                    <input type="number" v-model="descr.Hours" class="form-control" />
+                                </td>
+                            </tr>
+                        </slot>
+                    </div>
+
+                    <div class="modal-footer">
+                        <slot name="footer">
+                            <button class="modal-default-button" v-on:click="$emit('close');">Close</button>
+                            <button class="modal-default-button" v-on:click="onSave">Save </button>
+                        </slot>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </transition>
+</script>

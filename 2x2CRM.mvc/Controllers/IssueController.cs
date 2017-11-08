@@ -40,6 +40,12 @@ namespace _2x2CRM.mvc.Controllers
 
             _suppPerson = await _storePerson.FindByEmailAsync(_email);
 
+            IEnumerable<Person> persons = await _storePerson.GetAll();
+            List<Entity> entities = new List<Entity>();
+            //To restrict information sending to client, send only Id and Name
+            persons.ForEach(p => { entities.Add(new Entity() { Id = p.Id, Name = p.Name }); });
+            ViewBag.persons = entities;
+
             //var _suppPersonPromise =  _storePerson.FindByEmailAsync(_email);
 
             Issue i = new Issue();
@@ -52,9 +58,6 @@ namespace _2x2CRM.mvc.Controllers
             //    .TypedValue.ToString();
 
             var n = i.GetType().GetProperty("OpDate").CustomAttributes.ToList();
-
-            IEnumerable<Person> persons = await _storePerson.GetAll();
-
             IEnumerable<Issue> issues = await _storeIssue.GetSuppIssues(_suppPerson.Id);
 
             issues  = issues.OrderByDescending(x => x.OpDate);
@@ -100,6 +103,16 @@ namespace _2x2CRM.mvc.Controllers
         }
 
         [HttpGet]
+        public async Task<JsonResult> AddOrUpdate2(Int64 id = 0)
+        {
+            Issue issue = await _storeIssue.FindByIdAsync(id); ;
+            issue.Client = await _storePerson.FindByIdAsync(issue.ClientId);
+            issue.Supporter = await _storePerson.FindByIdAsync(issue.SuppId);
+            issue.IssueDetails = await _storeIssue.GetIssueDetails(issue.Id);
+            return Json(issue, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
         public async Task<ActionResult> Delete(Int64 id = 0)
         {
             await _storeIssue.DeleteAsync(id);
@@ -109,7 +122,6 @@ namespace _2x2CRM.mvc.Controllers
         [HttpPost]
         public async Task<long> AddOrUpdate(Issue issue)
         {
-
             await _storeIssue.AddOrUpdateAsync(issue);
 
             for (int i = 0; i < issue.IssueDetails.Count; i++)
