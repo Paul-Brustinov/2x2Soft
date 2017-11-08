@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Welcome to Vue</title>
+  <!-- <script src="https://unpkg.com/vue"></script> -->
+  <link 
+	rel="stylesheet" type="text/css"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+  >
+  
+  <!-- <script src="https://unpkg.com/vue-select"></script> -->
+  
+
+    <script src="../vue-select.min.js"></script>
+    <script src="../vue.min.js"></script>
+
+</head>
+<body>
+
+<div id="app">
+  <v-select
+	:debounce="250"
+	:on-search="getOptions"
+	:options="options"
+	placeholder="Search GitHub Repositories..."
+	label="full_name"
+	>
+	</v-select>
+</div>
+
+  <script>
+	
+Vue.component('v-select', VueSelect.VueSelect);
+
+new Vue({
+    el: '#app',
+    data() {
+        return {
+            options: []
+        }
+    },
+    methods: {
+        getOptions(search, loading) {
+            loading(true);
+
+            fetch('https://api.github.com/search/repositories?q=' + search)
+                .then(resp => resp.json())
+                .then(data => {
+                    this.options = data.items;
+                    loading(false);
+                });
+        }
+    }
+});
+
+</script>
+</body>
+</html>

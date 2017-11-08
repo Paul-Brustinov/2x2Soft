@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using _2x2CRM.mvc.Models.Area;
+using _2x2CRM.mvc.Models.Area.Common;
 using _2x2Soft.Infrastructure;
 
 namespace _2x2CRM.mvc.Controllers
@@ -18,7 +19,7 @@ namespace _2x2CRM.mvc.Controllers
         public PersonController()
         {
             _dbContext = ServiceLocator.Current.GetService<IDbContext>();
-            _store = new PersonStore(_dbContext);
+            _store = new PersonStore(_dbContext, "Person", "Crm");
         }
 
         // GET: Person
@@ -28,6 +29,15 @@ namespace _2x2CRM.mvc.Controllers
             IEnumerable<Person> Persons =  await _store.GetPage(id, 20);
             return View(Persons);
         }
+
+        public async Task<ActionResult> ListJson()
+        {
+            IEnumerable<Person> persons = await _store.GetAll();
+
+            //object json = Json(Persons, JsonRequestBehavior.AllowGet);
+            return View(persons);
+        }
+
 
         [Authorize]
         public async Task<ActionResult> Edit(long id)

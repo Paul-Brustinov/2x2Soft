@@ -1,0 +1,204 @@
+﻿@model _2x2CRM.mvc.Models.Area.Issue
+<script src="~/Content/vue-select.min.js"></script>
+<script src="~/Content/vue.min.js"></script>
+@{
+    ViewBag.Title = "AddOrUpdate";
+}
+
+<h2>AddOrUpdate</h2>
+
+<style type="text/css">
+    .form-control2 {
+        width: 100%;
+    }
+
+    .form-table2 {
+        border: 1px solid #cccccc;
+        border-radius: 4px;
+    }
+</style>
+
+@Html.AntiForgeryToken()
+<h4>Issue</h4>
+<div id="app">
+
+
+
+    <input data-val="true" id="ClientId" name="ClientId" type="hidden" v-model="ClientId" />
+    <input data-val="true" id="Id" name="Id" type="hidden" v-bind:value="Id" />
+
+    <hr />
+
+    <div class="form-group row">
+        <label class="control-label col-md-1" for="OpDate">OpDate</label>
+        <div class="col-md-9">
+            <input id="OpDate" name="OpDate" v-bind:value="OpDate" class="form-control" />
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label class="control-label col-md-1" for="Client">Client</label>
+        <div class="col-md-9">
+            <v-select :debounce="1000"
+                      :on-search="getClientOptions"
+                      :on-change="getClientIdCallback"
+                      :options="optionsClient"
+                      :value= Client
+                      placeholder="Search client..."
+                      label="Name"
+                      name="Client"
+                      id="Client">
+            </v-select>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label class="control-label col-md-1" for="Client">Supporter</label>
+        <div class="col-md-9">
+            <v-select :debounce="1000"
+                      :on-search="getSuppOptions"
+                      :on-change="getSuppIdCallback"
+                      :options="optionsSupp"
+                      :value= Supporter
+                      placeholder="Search supporter..."
+                      label="Name"
+                      name="Supp"
+                      id="Supp">
+            </v-select>
+        </div>
+    </div>
+
+    <table>
+
+        <tr>
+            <td> Issue </td>
+            <td> Hours </td>
+        </tr>
+
+
+        <tr v-for="descr in IssueDetails">
+            <td>
+                <textarea cols="100" v-on:keyup="onChange" style="max-width: 748px; width: 748px; max-height: 80px; height: 80px; resize: none;" maxlength="255" v-model="descr.Description" class="form-control" name="IssueDetails[]" placeholder="Enter task"></textarea>
+            </td>
+            <td style="vertical-align: top;">
+                <input type="number" v-model="descr.Hours" class="form-control" />
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                <button v-on:click="onSave">Save</button>
+                @*<input type="submit" value="Save" class="btn btn-default"/>*@
+            </td>
+        </tr>
+
+
+    </table>
+</div>
+
+
+<div>
+    @Html.ActionLink("Back to List", "MyIssues")
+    @Html.ActionLink("New", "AddOrUpdate")
+</div>
+
+
+<script>
+
+    var ag_entities = @Html.Raw(Json.Encode(@ViewBag.persons));
+    var asp_model = @Html.Raw(Json.Encode(@Model));
+    var supporterName = @Html.Raw(Json.Encode(@ViewBag.selectedSupporterName));
+
+    Vue.component('v-select', VueSelect.VueSelect);
+    var vue = new Vue({
+        el: '#app',
+        data() {
+            return {
+                Id:'@Model.Id',
+                OpDate: '@Model.OpDate.ToString("dd.MM.yyyy")',
+                ClientId: '@Model.ClientId',
+                SuppId: '@Model.SuppId',
+                IssueDetails : @Html.Raw(Json.Encode(@Model.IssueDetails)), //[{Description:"", Hours:"" }],
+                Supporter:{Id:@Model.SuppId  , Name:'@Html.Raw(@Model.SupporterName)'},
+                Client   :{Id:@Model.ClientId, Name:'@Html.Raw(@Model.ClientName)'},
+                optionsClient: ag_entities,
+                optionsSupp: ag_entities,
+                items: ag_entities
+            }
+        },
+        methods: {
+            getClientOptions(search, loading) {
+                loading(true);
+                this.options = this.items.filter(function(item) {return item.Name.toLowerCase().indexOf(search.toLowerCase()) !== -1;});
+                loading(false);
+            },
+            getClientIdCallback(val) {
+                this.ClientId = val.Id;
+                //console.dir(JSON.stringify(val));
+            },
+            getSuppOptions(search, loading) {
+                loading(true);
+                this.options = this.items.filter(function(item) {return item.Name.toLowerCase().indexOf(search.toLowerCase()) !== -1;});
+                loading(false);
+            },
+            getSuppIdCallback(val) {
+                this.SuppId = val.Id;
+                //console.dir(JSON.stringify(val));
+            },
+            onChange(val) {
+                //console.log("onChange");
+                if (this.IssueDetails[this.IssueDetails.length - 1].Description.length) {
+                    this.IssueDetails.push({Description:"", Hours:0.00 });
+                }
+            },
+            onSave2() {
+                var sendModel = {
+                    Id:this.Id,
+                    OpDate:this.OpDate,
+                    ClientId:this.ClientId,
+                    SuppId:this.SuppId,
+                    IssueDetails:this.IssueDetails.filter(function(item) {return item.Description.trim() !== "";})
+                }
+
+                $.ajax({
+                    contentType: 'application/json; charset=utf-8',
+                    dataType: 'json',
+                    type: 'POST',
+                    url: '/Issue/AddOrUpdate',
+                    data: JSON.stringify(sendModel),
+                    success:function(response) {
+                        console.log(response);
+                    }
+                });
+            },
+            onSave() {
+                this.IssueDetails.forEach((item)=> item.Hours = Number(item.Hours));
+
+                var sendModel = {
+                    Id:this.Id,
+                    OpDate:this.OpDate,
+                    ClientId:this.ClientId,
+                    SuppId:this.SuppId,
+                    IssueDetails:this.IssueDetails.filter(function(item) {return item.Description.trim() !== "";})
+                }
+
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", "/Issue/AddOrUpdate", true);
+                xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
+                xhr.onreadystatechange = () => {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        this.Id = xhr.responseText;
+                        window.history.pushState('/Issue/AddOrUpdate', '/Issue/AddOrUpdate', '/Issue/AddOrUpdate/'+this.Id);
+                        //console.log(xhr.responseText);
+                    }
+                };
+                var data = JSON.stringify(sendModel);
+                xhr.send(data);
+            }
+        }
+    });
+</script>
+
+
+
+

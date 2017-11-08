@@ -3,95 +3,26 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
-using WebGrease.Css.Ast;
+using _2x2CRM.mvc.Models.Area.Common;
 using _2x2Soft.Infrastructure;
 
 namespace _2x2CRM.mvc.Models.Area
 {
-    public class PersonStore
+    public class PersonStore : Store<Person>
     {
-        private IDbContext _dbContext;
-        private PersonCache _cache;
-
-        class PersonCache
+        public PersonStore(IDbContext dbContext, string name, string schema) : base(dbContext, name, schema)
         {
-            Dictionary<Int64, Person> _mapIds = new Dictionary<Int64, Person>();
-
-            public Person GetById(Int64 id)
-            {
-                Person person = null;
-                if (_mapIds.TryGetValue(id, out person))
-                    return person;
-                return null;
-            }
-
-            public void Remove(Int64 personId)
-            {
-                if (_mapIds.ContainsKey(personId))
-                    _mapIds.Remove(personId);
-            }
-
-
-            public void CachePerson(Person person)
-            {
-                if (person == null)
-                    return;
-                if (!_mapIds.ContainsKey(person.Id))
-                {
-                    _mapIds.Add(person.Id, person);
-                }
-                else
-                {
-                    var existing = _mapIds[person.Id];
-                    if (!Comparer<Person>.Equals(person, existing))
-                        throw new InvalidProgramException("Invalid user cache");
-                }
-            }
         }
 
-        public PersonStore(IDbContext dbContext)
+        public async Task<Person> FindByEmailAsync(string email)
         {
-            _dbContext = dbContext;
-            _cache = new PersonCache();
-        }
+            var person = _cache.MapIds.FirstOrDefault(x => x.Value.Emails.Any(e => e.Value == email)).Value;
+            if (person != null) return person;
 
-        public async Task CreateAsync(Person person)
-        {
-            await _dbContext.ExecuteAsync(null, "[Crm].[PersonCreate]", person);
-            CachePerson(person);
-        }
-
-        public async Task DeleteAsync(long personId)
-        {
-            await _dbContext.ExecuteAsync(null, "[Crm].[PersonDelete]", new { Id = personId });
-        }
-
-        public async Task<Person> FindByIdAsync(Int64 personId)
-        {
-            Person person = _cache.GetById(personId);
-            if (person != null)
-                return person;
-            person = await _dbContext.LoadAsync<Person>(null, "[Crm].[PersonFindById]", new { Id = personId });
-            CachePerson(person);
+            person = await _dbContext.LoadAsync<Person>(null, _entitySchema + "." + _entityName + "FindByEmail", new { Email = email });
+            _cache.CacheEntity(person);
             return person;
         }
-
-        public async Task UpdateAsync(Person person)
-        {
-            await _dbContext.ExecuteAsync<Person>(null, "[Crm].[PersonUpdate]", person);
-        }
-
-        public async Task<IList<Person>> GetPage(int pageNo, int pageCount)
-        {
-            IList<Person> list = await _dbContext.LoadListAsync<Person>(null, "[Crm].[PersonGetPage]", new { PageNo = pageNo, PageCount = pageCount });
-            return list;
-        }
-
-        void CachePerson(Person person)
-        {
-            _cache.CachePerson(person);
-        }
-
 
     }
 }

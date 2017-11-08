@@ -85,19 +85,26 @@ namespace _2x2Soft.Data
                 {
                     if (setParams != null)
                         setParams(cmd.Parameters);
-                    using (SqlDataReader rdr = await cmd.ExecuteReaderAsync())
+                    try
                     {
-                        do
+                        using (SqlDataReader rdr = await cmd.ExecuteReaderAsync())
                         {
-                            if (onMetadata != null)
-                                onMetadata(rdrNo, rdr);
-                            while (await rdr.ReadAsync())
+                            do
                             {
-                                if (onRead != null)
-                                    onRead(rdrNo, rdr);
-                            }
-                            rdrNo += 1;
-                        } while (await rdr.NextResultAsync());
+                                if (onMetadata != null)
+                                    onMetadata(rdrNo, rdr);
+                                while (await rdr.ReadAsync())
+                                {
+                                    if (onRead != null)
+                                        onRead(rdrNo, rdr);
+                                }
+                                rdrNo += 1;
+                            } while (await rdr.NextResultAsync());
+                        }
+                    }
+                    catch (SqlException e)
+                    {
+                        ;
                     }
                 }
             }

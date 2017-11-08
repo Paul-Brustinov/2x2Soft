@@ -200,6 +200,7 @@
     <Compile Include="Configuration\WebProfiler.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\IssueController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
     <Compile Include="Controllers\PersonController.cs" />
     <Compile Include="Global.asax.cs">
@@ -207,9 +208,16 @@
     </Compile>
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\Area\BusinessAddress.cs" />
+    <Compile Include="Models\Area\Common\EntityCache.cs" />
+    <Compile Include="Models\Area\Common\IEntity.cs" />
+    <Compile Include="Models\Area\Common\Store.cs" />
     <Compile Include="Models\Area\Email.cs" />
     <Compile Include="Models\Area\Enterprise.cs" />
+    <Compile Include="Models\Area\Entity.cs" />
     <Compile Include="Models\Area\Human.cs" />
+    <Compile Include="Models\Area\IssueDetail.cs" />
+    <Compile Include="Models\Area\IssueDetailStore.cs" />
+    <Compile Include="Models\Area\IssueStore.cs" />
     <Compile Include="Models\Area\PersonStore.cs" />
     <Compile Include="Models\Area\Phone.cs" />
     <Compile Include="Models\IdentityModels.cs" />
@@ -220,13 +228,17 @@
     <Compile Include="Models\UserIdentity\AppUserManager.cs" />
     <Compile Include="Models\UserIdentity\AppUserStore.cs" />
     <Compile Include="Models\Area\Person.cs" />
-    <Compile Include="Models\ViewModels\Issue\Issue.cs" />
+    <Compile Include="Models\Area\Issue.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="App_Start\Startup.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
+    <Content Include="Content\Examples\vue-select-example.html" />
+    <Content Include="Content\vue-js-modal.min.js" />
+    <Content Include="Content\vue-select.min.js" />
+    <Content Include="Content\vue.min.js" />
     <Content Include="favicon.ico" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
@@ -286,9 +298,14 @@
     <Content Include="Views\Person\Edit.cshtml" />
     <Content Include="Views\Person\Create.cshtml" />
     <Content Include="Views\Person\Details.cshtml" />
+    <Content Include="Views\Person\ListJson.cshtml" />
+    <Content Include="Views\Issue\AddOrUpdate.cshtml" />
+    <Content Include="Views\Issue\Index.cshtml" />
+    <Content Include="Views\Issue\MyIssues.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Models\ViewModels\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff" />

@@ -1,0 +1,108 @@
+﻿@model IEnumerable<_2x2CRM.mvc.Models.Area.Issue>
+
+@{
+    ViewBag.Title = "MyIssues";
+}
+
+<head>
+    <script src="~/Content/vue.min.js"></script>
+    <script src="~/Content/vue-js-modal.min.js"></script>
+</head>
+
+
+<h2>MyIssues</h2>
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+
+<div id="issue-list">
+    <input inputmode="" type="text" placeholder="input filter" v-model="filter1" />
+    Страница <input inputmode="" type="text" placeholder="page" v-model="pageNo" />
+
+    <button v-on:click="prevPage"><</button>
+    <button v-on:click="nextPage">></button>
+    показано {{(pageNo-1) * pageRows + 1}} - {{pageNo * pageRows}}
+    из {{rows}}
+    страниц {{pages}}
+
+
+    <table class="table">
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.OpDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Client)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+
+            </th>
+        </tr>
+
+        @* (Date("\/Date(item.OpDate)\/".replace("\/Date(","").replace(")\/", ""))) *@
+        <tr v-for="item in filtered_items" :key="item.Id">
+            <td>{{item.Date}}</td>
+            <td>{{item.ClientName}}</td>
+            <td>{{item.Name}}</td>
+            <td>
+                <a :href="'/Issue/AddOrUpdate/' + item.Id"> Edit </a>
+                <a :href="'/Issue/Delete/' + item.Id"> Delete </a>
+            </td>
+        </tr>
+
+
+    </table>
+</div>
+    <script>
+        var personList = new Vue({
+            el: '#issue-list',
+            data: {
+                items: @Html.Raw(Json.Encode(Model)),
+                filter: "",
+                pageNo: 1,
+                pageRows: 40,
+                pages: 0,
+                rows: 0
+            },
+            computed: {
+                filtered_items: function() {
+                    var ret = [];
+                    var ret0 = [];
+                    var self = this;
+                    ret0 = self.items.filter(function(item) {
+                        return item.ClientName.toLowerCase().indexOf(self.filter.toLowerCase()) !== -1;
+                    });
+                    ret = ret0.filter(function(item, index) {
+                        return (index >= (0 + (self.pageNo - 1) * self.pageRows) && index < (self.pageNo) * self.pageRows);
+                    });
+
+                    this.pages = Math.ceil(ret0.length / this.pageRows);
+                    self.rows = ret0.length;
+                    return ret;
+                },
+                filter1: {
+                    get: function() {
+                        return this.filter;
+                    },
+                    set: function(newValue) {
+                        this.pageNo = 1;
+                        this.filter = newValue;
+                    }
+                }
+            },
+            methods: {
+                nextPage: function(event) {
+                    if (this.pageNo < this.pages) this.pageNo++;
+                },
+                prevPage: function(event) {
+                    if (this.pageNo > 1) this.pageNo--;
+                }
+            }
+        })
+
+    </script>
+

@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
 using Microsoft.Owin.BuilderProperties;
 using Newtonsoft.Json;
+using _2x2CRM.mvc.Models.Area.Common;
 
 namespace _2x2CRM.mvc.Models.Area
 {
-    public class Person
+    public class Person : IEntity
     {
         public long Id { get; set; }
         public string Name { get; set; }

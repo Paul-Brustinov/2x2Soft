@@ -1,0 +1,109 @@
+﻿@model  IEnumerable<_2x2CRM.mvc.Models.Area.Person>
+
+@{
+    ViewBag.Title = "Person list";
+}
+
+<head>
+    @*<script src="https://unpkg.com/vue"></script>*@
+    <script src="~/Content/vue.min.js"></script>
+</head>
+
+<h2>ListJson</h2>
+
+
+
+<div id="person-list">
+    <input inputmode="" type="text" placeholder="input filter" v-model="filter1" />
+    Страница <input inputmode="" type="text" placeholder="page" v-model="pageNo" />
+
+    <button v-on:click="prevPage"><</button>
+    <button v-on:click="nextPage">></button>
+    показано {{(pageNo-1) * pageRows + 1}} - {{pageNo * pageRows}}
+    из {{rows}}
+    страниц {{pages}}
+
+    <table class="table">
+
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Id)
+            </th>
+
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Code)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Memo)
+            </th>
+            <th></th>
+        </tr>
+
+        <tr v-for="item in filtered_items" :key="item.Id">
+            <th> {{ item.Id }} </th>
+            <th> {{ item.Name }} </th>
+            <th> {{ item.Code }} </th>
+            <th> {{ item.Memo }} </th>
+
+            <th>
+                <a :href="'/Person/Details/' + item.Id"> Details </a>
+                <a :href="'/Person/Edit/' + item.Id"> Edit </a>
+                <a :href="'/Person/Delete/' + item.Id"> Delete </a>
+            </th>
+        </tr>
+
+    </table>
+</div>
+<script>
+    var personList = new Vue({
+        el: '#person-list',
+        data: {
+            items: @Html.Raw(Json.Encode(Model)),
+            filter: "",
+            pageNo: 1,
+            pageRows: 40,
+            pages: 0,
+            rows: 0
+        },
+        computed: {
+            filtered_items: function() {
+                var ret = [];
+                var ret0 = [];
+                var self = this;
+                ret0 = self.items.filter(function(item) {
+                            return item.Name.toLowerCase().indexOf(self.filter.toLowerCase()) !== -1;
+                        });
+                ret = ret0.filter(function(item, index) {
+                            return (index >= (0 + (self.pageNo - 1) * self.pageRows) && index < (self.pageNo) * self.pageRows);
+                        });
+
+                this.pages = Math.ceil(ret0.length / this.pageRows);
+                self.rows = ret0.length;
+                return ret;
+            },
+            filter1: {
+                get: function() {
+                    return this.filter;
+                },
+                set: function(newValue) {
+                    this.pageNo = 1;
+                    this.filter = newValue;
+                }
+            }
+        },
+        methods: {
+            nextPage: function(event) {
+                if (this.pageNo < this.pages) this.pageNo++;
+            },
+            prevPage: function(event) {
+                if (this.pageNo > 1) this.pageNo--;
+            }
+
+        }
+    })
+
+
+</script>

@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
+using _2x2CRM.mvc.Models.Area;
 
 namespace _2x2CRM.mvc.Models
 {
@@ -31,5 +32,9 @@ namespace _2x2CRM.mvc.Models
         }
 
         public System.Data.Entity.DbSet<_2x2CRM.mvc.Models.Area.Person> People { get; set; }
+
+        public System.Data.Entity.DbSet<Issue> Issues { get; set; }
+
+        public System.Data.Entity.DbSet<_2x2CRM.mvc.Models.Area.IssueDetail> IssueDetails { get; set; }
     }
 }
