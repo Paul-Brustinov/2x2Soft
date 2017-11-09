@@ -80,18 +80,19 @@
 
 <h2>MyIssues</h2>
 
-<p>
-    @Html.ActionLink("Create New", "Create")
-</p>
 
 <div id="issue-list">
-    <input inputmode="" type="text" placeholder="input filter" v-model="filter1" />
-    Страница <input inputmode="" type="text" placeholder="page" v-model="pageNo" />
+    <p>
+        <button v-on:click="edit2(0)">Create New Issue</button>
+    </p>
+
+    <input inputmode="" type="text" placeholder="input filter" v-model="filter1"/>
+    Страница <input inputmode="" type="text" placeholder="page" v-model="pageNo"/>
 
     <button v-on:click="prevPage"><</button>
     <button v-on:click="nextPage">></button>
 
-    <button id="show-modal" v-on:click="showModal = true">Show Modal</button>
+
     <!-- use the modal component, pass in the prop -->
     показано {{(pageNo-1) * pageRows + 1}} - {{pageNo * pageRows}}
     из {{rows}}
@@ -113,44 +114,32 @@
             </th>
         </tr>
 
-        @* (Date("\/Date(item.OpDate)\/".replace("\/Date(","").replace(")\/", ""))) *@
         <tr v-for="item in filtered_items" :key="item.Id">
             <td>{{item.Date}}</td>
             <td>{{item.ClientName}}</td>
             <td>{{item.Name}}</td>
             <td>
-                <a :href="'/Issue/AddOrUpdate/' + item.Id"> Edit </a>
-                <button v-on:click="edit2(item.Id)">Edit2</button>
-                <a :href="'/Issue/Delete/' + item.Id"> Delete </a>
+                <button v-on:click="edit2(item.Id)">Edit</button>
+                <button v-on:click="deleteIssue(item.Id)">Delete</button>
             </td>
         </tr>
-
-
     </table>
 
-    <modal v-if="showModal" v-on:close="showModal = false" :Id="currentId" :Issue.sync="currentIssue" :Persons="persons">
+    <modal v-if="showModal" v-on:close="showModal = false" :Issues.sync="issues" :Issue.sync="currentIssue" :Persons="persons">
     </modal>
 </div>
 <script>
 
     Vue.component('v-select', VueSelect.VueSelect);
-    //Client:this.Persons.Find((el)=>{el.Id==this.Issue.ClientId})
-    //Client:{Id:this.ClientId, Name:this.Persons.find((el)=>{return el.Id==this.ClientId}).Name}
     Vue.component('modal',
     {
         template: '#modal-template',
-        props: ['Id', 'Issue', 'Persons'],
+        props: ['Issues', 'Issue', 'Persons'],
         data: function () {
             return {
-                OpDate: this.Issue.Date,
-                ClientId: this.Issue.ClientId,
-                SuppId: this.Issue.SuppId,
-                IssueDetails : this.Issue.IssueDetails,
-                Supporter:{Id:this.Issue.SuppId  , Name: this.Issue.SupporterName},
                 optionsSupp: this.Persons,
                 optionsClient: this.Persons,
-                items: this.Persons,
-                Client:{Id:this.ClientId, Name:"not defined"}
+                persons: this.Persons
             }
         },
         methods: {
@@ -162,28 +151,26 @@
             },
             getClientOptions(search, loading) {
                 loading(true);
-                this.options = this.items.filter(function(item) {return item.Name.toLowerCase().indexOf(search.toLowerCase()) !== -1;});
+                this.options = this.persons.filter(function(item) {return item.Name.toLowerCase().indexOf(search.toLowerCase()) !== -1;});
                 loading(false);
             },
             getClientIdCallback(val) {
-                this.ClientId = val.Id;
+                this.Issue.ClientId = val.Id;
                 //console.dir(JSON.stringify(val));
             },
             getSuppOptions(search, loading) {
                 loading(true);
-                this.options = this.items.filter(function(item) {return item.Name.toLowerCase().indexOf(search.toLowerCase()) !== -1;});
+                this.options = this.persons.filter(function(item) {return item.Name.toLowerCase().indexOf(search.toLowerCase()) !== -1;});
                 loading(false);
             },
             getSuppIdCallback(val) {
-                this.SuppId = val.Id;
+                this.Issue.SuppId = val.Id;
                 //console.dir(JSON.stringify(val));
             },
             onSave() {
-                this.Issue.ClientName = this.items.find((el) => el.Id === this.ClientId).Name;
-                this.Issue.Client.Name = this.Issue.ClientName;
-                this.Issue.Client.Id = this.Issue.ClientId;
+                this.Issue.Client = this.persons.find((el) => el.Id === this.Issue.ClientId);
+                this.Issue.ClientName = this.Issue.Client.Name;
                 this.Issue.Name = this.Issue.IssueDetails[0].Description;
-
 
                 this.Issue.IssueDetails.forEach((item)=> item.Hours = Number(item.Hours));
 
@@ -191,10 +178,10 @@
                 d = d.slice(6, 10) + "-" + d.slice(3, 5) + "-" + d.slice(0, 2);
 
                 var sendModel = {
-                    Id:this.Id,
+                    Id:this.Issue.Id,
                     OpDate:d,
-                    ClientId:this.ClientId,
-                    SuppId:this.SuppId,
+                    ClientId:this.Issue.ClientId,
+                    SuppId:this.Issue.SuppId,
                     IssueDetails:this.Issue.IssueDetails.filter(function(item) {return item.Description.trim() !== "";})
                 }
 
@@ -203,10 +190,14 @@
                 xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
                 xhr.onreadystatechange = () => {
                     if (xhr.readyState === 4 && xhr.status === 200) {
-                        this.Id = xhr.responseText;
-                        //window.history.pushState('/Issue/AddOrUpdate', '/Issue/AddOrUpdate', '/Issue/AddOrUpdate/'+this.Id);
+                        var flag = this.Issue.Id === 0;
+                        this.Issue.Id = Number(xhr.responseText);
+
+                        if (flag) this.Issues.unshift(this.Issue);
+                        //window.history.pushState('/Issue/AddOrUpdate', '/Issue/AddOrUpdate', '/Issue/AddOrUpdate/'+this.Issue.Id);
                         //console.log(xhr.responseText);
                     }
+
                 };
                 var data = JSON.stringify(sendModel);
                 xhr.send(data);
@@ -223,11 +214,10 @@
 
     //Vue.component('vue-js-modal');
 
-
     var issueList = new Vue({
         el: '#issue-list',
         data: {
-            items: @Html.Raw(Json.Encode(Model)),
+            issues: @Html.Raw(Json.Encode(Model)),
             filter: "",
             pageNo: 1,
             pageRows: 40,
@@ -237,13 +227,13 @@
             currentId: 0,
             persons:@Html.Raw(Json.Encode(@ViewBag.persons)),
             currentIssue: {}
-            },
+        },
         computed: {
             filtered_items: function() {
                 var ret = [];
                 var ret0 = [];
                 var self = this;
-                ret0 = self.items.filter(function(item) {
+                ret0 = self.issues.filter(function(item) {
                     return item.ClientName.toLowerCase().indexOf(self.filter.toLowerCase()) !== -1;
                 });
                 ret = ret0.filter(function(item, index) {
@@ -271,20 +261,68 @@
             prevPage: function(event) {
                 if (this.pageNo > 1) this.pageNo--;
             },
+            deleteIssue: function(i) {
+                var xhr = new XMLHttpRequest();
+                xhr.open("GET", "/Issue/Delete/"+i, true);
+                xhr.onreadystatechange = () => {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        var removeIndex = this.issues.map(function(item) { return item.Id; }).indexOf(Number(i));
+                        ~removeIndex && this.issues.splice(removeIndex, 1);
+                    }
+                };
+                xhr.send();
+            },
             edit2: function(i) {
-                this.currentId = i;
 
-                this.currentIssue = this.items.find(el => el.Id === i);
+                if (i !== 0) {
+                    this.currentId = i;
+                    this.currentIssue = this.issues.find(el => el.Id === i);
+                    fetch('http://localhost:64129/Issue/AddOrUpdate2/' + i)
+                        .then(resp => resp.json())
+                        .then(data => {
+                            this.currentIssue.IssueDetails = data.IssueDetails;
+                            this.currentIssue.IssueDetails.push({ Description: "", Hours: 0.00 });
+                            this.currentIssue.Client = this.persons.find((el) => el.Id === data.ClientId);
+                            this.currentIssue.Supporter = this.persons.find((el) => el.Id === data.SuppId);
+                        });
 
-                fetch('http://localhost:64129/Issue/AddOrUpdate2/' + i)
-                    .then(resp => resp.json())
-                    .then(data => {
-                        this.currentIssue.IssueDetails = data.IssueDetails;
-                        this.currentIssue.IssueDetails.push({Description:"", Hours:0.00 });
-                        this.currentIssue.Client = this.persons.find((el) => el.Id === data.ClientId);
-                        this.currentIssue.Supporter = this.persons.find((el) => el.Id === data.SuppId);
-                    });
+                } else {
+                    this.currentId = 0;
+                    //var tmpIssue = this.items.find(x => true);
 
+                    var tmpIssue = this.issues.reduce((prev, current) => (prev.OpDate > current.OpDate) ? prev : current)
+
+                    var suppId = 0;
+                    var supporter = null;
+                    var clientId    = 0;
+                    var client      = null;
+                    var supporterName = "";
+                    var clientName = "";
+
+                    if (tmpIssue !== null && tmpIssue !== undefined) {
+                        suppId    = tmpIssue.SuppId;
+                        supporter = tmpIssue.Supporter;
+                        supporterName = supporter!==null&&supporter!==undefined?supporter.Name:"";
+
+                        clientId    = tmpIssue.СlientId;
+                        client      = tmpIssue.Client;
+                        clientName = client!==null&&client!==undefined?client.Name:"";
+                     }
+
+                    this.currentIssue = {
+                        Id:0 
+                        ,OpDate:new Date()
+                        ,ClientId:clientId
+                        ,SuppId:suppId
+                        ,IssueDetails:[{Id:0, Description:""}]
+                        ,Client:client
+                        ,Supporter:supporter
+                        ,ClentName:clientName
+                        ,SupporterName:supporterName
+                        ,Date:("0"+new Date().getDate()).slice(-2) +"/"+ ("0"+(new Date().getMonth() + 1)).slice(-2) + "/" + new Date().getFullYear()
+                        ,Name:""
+                    }
+                }
                 this.showModal = true;
             },
             show: function() {
@@ -295,7 +333,6 @@
             }
         }
     });
-
 </script>
 
 <!-- template for the modal component -->
@@ -321,7 +358,6 @@
                                 </div>
                             </div>
 
-
                             <div class="form-group row">
                                 <label class="control-label col-md-1" for="Client">Client</label>
                                 <div class="col-md-9">
@@ -336,7 +372,6 @@
                                     </v-select>
                                 </div>
                             </div>
-
                             
                             <div class="form-group row">
                                 <label class="control-label col-md-1" for="Client">Supporter</label>

@@ -113,10 +113,10 @@ namespace _2x2CRM.mvc.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult> Delete(Int64 id = 0)
+        public async Task Delete(Int64 id = 0)
         {
             await _storeIssue.DeleteAsync(id);
-            return RedirectToAction("MyIssues", "Issue");
+            //return RedirectToAction("MyIssues", "Issue");
         }
 
         [HttpPost]
