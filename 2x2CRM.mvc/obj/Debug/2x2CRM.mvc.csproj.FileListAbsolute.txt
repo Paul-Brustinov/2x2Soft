@@ -1,3 +1,4 @@
+D:\_WORK\_STEP\ASP.net\2x2Soft\2x2CRM.mvc\obj\Debug\2x2CRM.mvc.csprojResolveAssemblyReference.cache
 D:\_WORK\_STEP\ASP.net\2x2Soft\2x2CRM.mvc\bin\ApplicationInsights.config
 D:\_WORK\_STEP\ASP.net\2x2Soft\2x2CRM.mvc\bin\roslyn\csc.exe
 D:\_WORK\_STEP\ASP.net\2x2Soft\2x2CRM.mvc\bin\roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll
@@ -52,11 +53,14 @@ D:\_WORK\_STEP\ASP.net\2x2Soft\2x2CRM.mvc\bin\System.Web.WebPages.Razor.dll
 D:\_WORK\_STEP\ASP.net\2x2Soft\2x2CRM.mvc\bin\WebGrease.dll
 D:\_WORK\_STEP\ASP.net\2x2Soft\2x2CRM.mvc\bin\2x2Soft.Data.pdb
 D:\_WORK\_STEP\ASP.net\2x2Soft\2x2CRM.mvc\bin\2x2Soft.Infrastructure.pdb
+D:\_WORK\_STEP\ASP.net\2x2Soft\2x2CRM.mvc\bin\EntityFramework.xml
+D:\_WORK\_STEP\ASP.net\2x2Soft\2x2CRM.mvc\bin\EntityFramework.SqlServer.xml
 D:\_WORK\_STEP\ASP.net\2x2Soft\2x2CRM.mvc\bin\Microsoft.AI.DependencyCollector.xml
 D:\_WORK\_STEP\ASP.net\2x2Soft\2x2CRM.mvc\bin\Microsoft.AI.ServerTelemetryChannel.xml
 D:\_WORK\_STEP\ASP.net\2x2Soft\2x2CRM.mvc\bin\Microsoft.AI.Web.xml
 D:\_WORK\_STEP\ASP.net\2x2Soft\2x2CRM.mvc\bin\Microsoft.AI.WindowsServer.xml
 D:\_WORK\_STEP\ASP.net\2x2Soft\2x2CRM.mvc\bin\Microsoft.ApplicationInsights.xml
+D:\_WORK\_STEP\ASP.net\2x2Soft\2x2CRM.mvc\bin\Microsoft.AspNet.Identity.EntityFramework.xml
 D:\_WORK\_STEP\ASP.net\2x2Soft\2x2CRM.mvc\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.xml
 D:\_WORK\_STEP\ASP.net\2x2Soft\2x2CRM.mvc\bin\System.Web.Helpers.xml
 D:\_WORK\_STEP\ASP.net\2x2Soft\2x2CRM.mvc\bin\System.Web.Mvc.xml
@@ -67,11 +71,8 @@ D:\_WORK\_STEP\ASP.net\2x2Soft\2x2CRM.mvc\bin\System.Web.WebPages.Deployment.xml
 D:\_WORK\_STEP\ASP.net\2x2Soft\2x2CRM.mvc\bin\System.Web.WebPages.Razor.xml
 D:\_WORK\_STEP\ASP.net\2x2Soft\2x2CRM.mvc\bin\Antlr3.Runtime.pdb
 D:\_WORK\_STEP\ASP.net\2x2Soft\2x2CRM.mvc\bin\Newtonsoft.Json.xml
-D:\_WORK\_STEP\ASP.net\2x2Soft\2x2CRM.mvc\bin\EntityFramework.xml
-D:\_WORK\_STEP\ASP.net\2x2Soft\2x2CRM.mvc\bin\EntityFramework.SqlServer.xml
 D:\_WORK\_STEP\ASP.net\2x2Soft\2x2CRM.mvc\bin\Microsoft.AspNet.Identity.Core.xml
 D:\_WORK\_STEP\ASP.net\2x2Soft\2x2CRM.mvc\bin\Microsoft.AspNet.Identity.Owin.xml
-D:\_WORK\_STEP\ASP.net\2x2Soft\2x2CRM.mvc\bin\Microsoft.AspNet.Identity.EntityFramework.xml
 D:\_WORK\_STEP\ASP.net\2x2Soft\2x2CRM.mvc\bin\Microsoft.Owin.xml
 D:\_WORK\_STEP\ASP.net\2x2Soft\2x2CRM.mvc\bin\Microsoft.Owin.Host.SystemWeb.xml
 D:\_WORK\_STEP\ASP.net\2x2Soft\2x2CRM.mvc\bin\Microsoft.Owin.Security.xml
@@ -81,6 +82,5 @@ D:\_WORK\_STEP\ASP.net\2x2Soft\2x2CRM.mvc\bin\Microsoft.Owin.Security.OAuth.xml
 D:\_WORK\_STEP\ASP.net\2x2Soft\2x2CRM.mvc\bin\Microsoft.Owin.Security.Google.xml
 D:\_WORK\_STEP\ASP.net\2x2Soft\2x2CRM.mvc\bin\Microsoft.Owin.Security.Twitter.xml
 D:\_WORK\_STEP\ASP.net\2x2Soft\2x2CRM.mvc\bin\Microsoft.Owin.Security.MicrosoftAccount.xml
-D:\_WORK\_STEP\ASP.net\2x2Soft\2x2CRM.mvc\obj\Debug\2x2CRM.mvc.csprojResolveAssemblyReference.cache
 D:\_WORK\_STEP\ASP.net\2x2Soft\2x2CRM.mvc\obj\Debug\2x2CRM.mvc.dll
 D:\_WORK\_STEP\ASP.net\2x2Soft\2x2CRM.mvc\obj\Debug\2x2CRM.mvc.pdb
