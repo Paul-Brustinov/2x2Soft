@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,12 +8,15 @@ using System.Web;
 using System.Web.Mvc;
 using Newtonsoft.Json;
 using WebGrease.Css.Extensions;
+using _2x2CRM.mvc.Cors;
 using _2x2CRM.mvc.Models.Area;
 using _2x2CRM.mvc.Models.Area.Common;
 using _2x2Soft.Infrastructure;
 
 namespace _2x2CRM.mvc.Controllers
 {
+
+    [Authorize]
     public class IssueController : Controller
     {
 
@@ -33,10 +37,41 @@ namespace _2x2CRM.mvc.Controllers
             _email = System.Web.HttpContext.Current.User.Identity.Name;
         }
 
+        //[AllowCrossSite]
+        public async Task<JsonResult> MyIssuesJson()
+        {
+            if (!User.Identity.IsAuthenticated) return Json("Need to login");
+            _suppPerson = await _storePerson.FindByEmailAsync(_email);
 
-        // GET: Issue
+            dynamic model = new ExpandoObject();
+            model.Email = _email;
+
+            IEnumerable<Person> persons = await _storePerson.GetAll();
+            List<Entity> entities = new List<Entity>();
+            //To restrict information sending to client, send only Id and Name
+            persons.ForEach(p => { entities.Add(new Entity() { Id = p.Id, Name = p.Name }); });
+            model.Persons = entities;
+
+            IEnumerable<Issue> issues = await _storeIssue.GetSuppIssues(_suppPerson.Id);
+
+            issues = issues.OrderByDescending(x => x.OpDate);
+            foreach (var issue in issues)
+            {
+                issue.Client = persons.FirstOrDefault(p => p.Id == issue.ClientId);
+                issue.Supporter = persons.FirstOrDefault(p => p.Id == issue.SuppId);
+            }
+
+            model.Issues = issues;
+
+            return Json(model, JsonRequestBehavior.AllowGet);
+        }
+
+
         public async Task<ActionResult>MyIssues()
         {
+
+            if (!User.Identity.IsAuthenticated)
+                return Json("Need to login");
 
             _suppPerson = await _storePerson.FindByEmailAsync(_email);
 
@@ -71,7 +106,6 @@ namespace _2x2CRM.mvc.Controllers
             return View(issues);
         }
 
-
         [HttpGet]
         public async Task<ActionResult> AddOrUpdate(Int64 id = 0)
         {
@@ -102,9 +136,12 @@ namespace _2x2CRM.mvc.Controllers
             return View(issue);
         }
 
+
         [HttpGet]
         public async Task<JsonResult> AddOrUpdate2(Int64 id = 0)
         {
+            //if (!User.Identity.IsAuthenticated)
+            //    return Json("Need to login");
             Issue issue = await _storeIssue.FindByIdAsync(id); ;
             issue.Client = await _storePerson.FindByIdAsync(issue.ClientId);
             issue.Supporter = await _storePerson.FindByIdAsync(issue.SuppId);
@@ -133,6 +170,23 @@ namespace _2x2CRM.mvc.Controllers
             _storeIssueDetail.IssueDetailDeleteExcess(issue.Id, issue.IssueDetails.Count - 1);
 
             return issue.Id;
+        }
+
+
+        [HttpPost]
+        public async Task<JsonResult> AddOrUpdateJson(Issue issue)
+        {
+            await _storeIssue.AddOrUpdateAsync(issue);
+
+            for (int i = 0; i < issue.IssueDetails.Count; i++)
+            {
+                issue.IssueDetails[i].IssueId = issue.Id;
+                issue.IssueDetails[i].LnNo = i;
+                _storeIssueDetail.AddOrUpdateAsync(issue.IssueDetails[i]);
+            }
+            _storeIssueDetail.IssueDetailDeleteExcess(issue.Id, issue.IssueDetails.Count - 1);
+
+            return Json(issue.Id);
         }
 
     }

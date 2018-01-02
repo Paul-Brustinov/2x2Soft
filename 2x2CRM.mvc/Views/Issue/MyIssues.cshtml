@@ -5,10 +5,12 @@
 }
 
 <head>
-    <script src="~/Content/vue.min.js"></script>
+    @*<script src="~/Content/vue.min.js"></script>*@
+    <script src="~/Content/vue.js"></script>
     <script src="~/Content/vue-select.min.js"></script>
     <script src="~/Content/vue-js-modal.min.js"></script>
     <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 </head>
 
 
@@ -130,14 +132,14 @@
 
 <div id="issue-list">
     <p>
-        <button v-on:click="edit2(0)">Create New Issue</button>
+        <button v-on:click="edit2(0)" class="btn btn-default">Create New Issue</button>
     </p>
 
     <input inputmode="" type="text" placeholder="input filter" v-model="filter1"/>
     Страница <input inputmode="" type="text" placeholder="page" v-model="pageNo"/>
 
-    <button v-on:click="prevPage"><</button>
-    <button v-on:click="nextPage">></button>
+    <button v-on:click="prevPage" class="btn btn-default"><</button>
+    <button v-on:click="nextPage" class="btn btn-default">></button>
 
 
     <!-- use the modal component, pass in the prop -->
@@ -168,8 +170,10 @@
             <td>{{item.ClientName}}</td>
             <td>{{item.Name}}</td>
             <td>
-                <button v-on:click="edit2(item.Id)">Edit</button>
-                <button v-on:click="deleteIssue(item.Id)">Delete</button>
+                <span class="input-group-btn">
+                    <button v-on:click="edit2(item.Id)" class="btn js-add  btn-default">Edit</button>
+                    <button v-on:click="deleteIssue(item.Id)" class="btn js-add btn-default">Delete</button>
+                </span>
             </td>
         </tr>
     </table>
@@ -283,7 +287,7 @@
                 if (i !== 0) {
                     this.currentId = i;
                     this.currentIssue = this.issues.find(el => el.Id === i);
-                    fetch('AddOrUpdate2/' + i)
+                    fetch('AddOrUpdate2/' + i, {credentials: 'include'})
                         .then(resp => resp.json())
                         .then(data => {
                             this.currentIssue.IssueDetails = data.IssueDetails;
@@ -292,11 +296,17 @@
                             this.currentIssue.Supporter = this.persons.find((el) => el.Id === data.SuppId);
                         });
 
+
+                    
                 } else {
                     this.currentId = 0;
                     //var tmpIssue = this.items.find(x => true);
+                    var tmpIssue = null;
+                    if (this.issues.length !== 0) {
+                        tmpIssue = this.issues
+                            .reduce((prev, current) => (prev.OpDate > current.OpDate) ? prev : current);
+                    }
 
-                    var tmpIssue = this.issues.reduce((prev, current) => (prev.OpDate > current.OpDate) ? prev : current)
 
                     var suppId = 0;
                     var supporter = null;
@@ -313,7 +323,7 @@
                         clientId    = tmpIssue.СlientId;
                         client      = tmpIssue.Client;
                         clientName = client!==null&&client!==undefined?client.Name:"";
-                    }
+                   }
 
                     this.currentIssue = {
                         Id:0 
@@ -430,7 +440,7 @@
                         </slot>
                     </div>
 
-                    <div class="modal-body">
+                    <div class="modal-body input-group">
                         <slot name="body">
 
                             <div class="form-group row">
@@ -483,8 +493,8 @@
 
                     <div class="modal-footer">
                         <slot name="footer">
-                            <button class="modal-default-button" v-on:click="$emit('close');">Close</button>
-                            <button class="modal-default-button" v-on:click="onSave">Save </button>
+                                <button class="modal-default-button js-add btn btn-default" v-on:click="$emit('close');">Close</button>
+                                <button class="modal-default-button js-add btn btn-default" v-on:click="onSave">Save </button>
                         </slot>
                     </div>
                 </div>
